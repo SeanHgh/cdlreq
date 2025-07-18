@@ -25,7 +25,7 @@ def init(directory: str):
     
     # Create directory structure
     (project_path / "requirements").mkdir(exist_ok=True)
-    (project_path / "specifications").mkdir(exist_ok=True)
+    (project_path / "requirements" / "specifications").mkdir(exist_ok=True)
     
     # Create example files
     example_req = Requirement(
@@ -58,12 +58,12 @@ def init(directory: str):
     # Save example files
     parser = ProjectParser()
     parser.save_requirement(example_req, project_path / "requirements" / "authentication.yaml")
-    parser.save_specification(example_spec, project_path / "specifications" / "authentication.yaml")
+    parser.save_specification(example_spec, project_path / "requirements" / "specifications" / "authentication.yaml")
     
     click.echo(f"Initialized cdlreq project in {project_path}")
     click.echo("Created example files:")
     click.echo("  requirements/authentication.yaml")
-    click.echo("  specifications/authentication.yaml")
+    click.echo("  requirements/specifications/authentication.yaml")
 
 
 @cli.command()
@@ -266,7 +266,7 @@ def create(type: str, id: Optional[str], title: Optional[str], req_type: Optiona
         )
         
         if not output:
-            output = f"specifications/{id.lower().replace('-', '_')}.yaml"
+            output = f"requirements/specifications/{id.lower().replace('-', '_')}.yaml"
         
         parser = ProjectParser()
         output_path = Path(output)

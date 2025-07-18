@@ -33,6 +33,19 @@ Validate all files:
 cdlreq validate
 ```
 
+## Directory Structure
+
+After initialization, your project will have this structure:
+```
+project/
+├── requirements/
+│   ├── requirement_files.yaml
+│   └── specifications/
+│       └── specification_files.yaml
+```
+
+Requirements and specifications are organized with specs nested under requirements for better organization.
+
 ## YAML Structure
 
 ### Requirements (REQ-XXX-###)
