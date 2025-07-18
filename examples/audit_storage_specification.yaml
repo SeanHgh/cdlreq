@@ -5,10 +5,4 @@ related_requirements:
   - REQ-AUD-001
 implementation_unit: src/audit/secure_storage.py
 unit_test: tests/audit/test_secure_storage.py
-test_criteria:
-  - Test immutable log storage with blockchain-like integrity
-  - Test cryptographic hash verification of log entries
-  - Test log compression and archival processes
-  - Test recovery and verification of archived logs
-  - Test performance of integrity verification operations
 design_notes: "Implements write-once storage with cryptographic hashing. Uses Merkle tree structure for efficient integrity verification. Supports both local and cloud-based storage backends."

@@ -49,6 +49,20 @@ cdlreq export --output traceability_matrix.xlsx
 ```
 Creates an Excel file with requirements, specifications, and a traceability matrix showing relationships.
 
+Check unit test coverage for specifications:
+```bash
+# Create a file listing all executed tests
+echo "tests/auth/test_oauth_service.py" > test_list.txt
+echo "tests/security/test_encryption_service.py" >> test_list.txt
+# Or include specific test functions
+echo "tests/auth/test_oauth_service.py::test_token_generation" >> test_list.txt
+echo "tests/auth/test_oauth_service.py::test_token_refresh" >> test_list.txt
+
+# Check coverage
+cdlreq coverage test_list.txt
+```
+Analyzes the test list to ensure all specification unit tests are being executed. The command performs function-level analysis, scanning test files for test functions (starting with `test_`) and checking which specific functions are covered by the test list.
+
 ## Directory Structure
 
 After initialization, your project will have this structure:
@@ -78,7 +92,8 @@ Requirements and specifications are organized with specs nested under requiremen
 - `description`: Detailed description
 - `related_requirements`: List of requirement IDs
 - `implementation_unit`: Path to source code file/module
-- `unit_test`: Path to test file/function
-- `test_criteria`: List of test criteria
+- `unit_test`: Path to unit test file/function
+- `design_notes`: Design notes and considerations (optional)
+- `dependencies`: List of dependent specification IDs (optional)
 
 Files are automatically identified by their ID prefix - no special file naming conventions required.

@@ -5,15 +5,4 @@ related_requirements:
   - "REQ-SEC-001"
 implementation_unit: "src/auth/oauth_authenticator.py"
 unit_test: "tests/auth/test_oauth_authenticator.py"
-test_criteria:
-  - "Test successful login with valid username/password and TOTP"
-  - "Test failed login with invalid username/password"
-  - "Test failed login with valid password but invalid TOTP"
-  - "Test account lockout after 3 failed attempts"
-  - "Test TOTP token expiration handling"
-  - "Test concurrent login attempts"
-  - "Test admin account unlock functionality"
 design_notes: "Uses PyOTP library for TOTP generation and validation. Implements rate limiting to prevent brute force attacks. Session tokens expire after 8 hours of inactivity."
-dependencies:
-  - "SPEC-DB-001"  # Database user management
-  - "SPEC-LOG-001"  # Audit logging

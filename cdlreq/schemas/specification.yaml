@@ -37,14 +37,7 @@ properties:
     description: "Path to source code file/module implementing this specification"
   unit_test:
     type: "string"
-    description: "Path to test file/function testing this specification"
-  test_criteria:
-    type: "array"
-    items:
-      type: "string"
-      minLength: 5
-    minItems: 1
-    description: "List of test criteria"
+    description: "Path to unit test file/function testing this specification"
   design_notes:
     type: "string"
     description: "Design notes and considerations"

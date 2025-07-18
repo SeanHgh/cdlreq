@@ -5,10 +5,4 @@ related_requirements:
   - REQ-SEC-001
 implementation_unit: src/auth/oauth_service.py
 unit_test: tests/auth/test_oauth_service.py
-test_criteria:
-  - Test successful OAuth token generation and validation
-  - Test token expiration and refresh mechanisms
-  - Test multi-factor authentication flow
-  - Test invalid credentials rejection
-  - Test concurrent authentication requests
 design_notes: "Uses industry-standard OAuth 2.0 with PKCE extension for enhanced security. Integrates with external identity providers and supports SAML federation."

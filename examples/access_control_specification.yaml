@@ -5,10 +5,4 @@ related_requirements:
   - REQ-PRI-001
 implementation_unit: src/security/rbac_manager.py
 unit_test: tests/security/test_rbac_manager.py
-test_criteria:
-  - Test role assignment and permission validation
-  - Test hierarchical role inheritance
-  - Test resource-level access control
-  - Test permission caching and performance
-  - Test role modification and immediate effect
 design_notes: "Implements RBAC with fine-grained permissions. Supports dynamic role assignment and delegation. Integrates with LDAP/Active Directory for enterprise environments."

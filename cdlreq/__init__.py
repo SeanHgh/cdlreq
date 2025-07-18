@@ -11,7 +11,7 @@ from .core.validator import RequirementValidator, SpecificationValidator
 
 __all__ = [
     "Requirement",
-    "Specification", 
+    "Specification",
     "RequirementParser",
     "SpecificationParser",
     "RequirementValidator",

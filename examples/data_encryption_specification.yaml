@@ -5,10 +5,4 @@ related_requirements:
   - REQ-PRI-001
 implementation_unit: src/security/encryption_service.py
 unit_test: tests/security/test_encryption_service.py
-test_criteria:
-  - Test AES-256 encryption and decryption of patient data
-  - Test key rotation and management
-  - Test encrypted data integrity verification
-  - Test performance impact of encryption operations
-  - Test backup and recovery of encrypted data
 design_notes: "Uses hardware security modules (HSM) for key management. Implements envelope encryption with data encryption keys (DEKs) and key encryption keys (KEKs)."
