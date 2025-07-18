@@ -256,7 +256,7 @@ def list(directory: str, type: Optional[str], format: str):
 
 @cli.command()
 @click.argument('type', type=click.Choice(['requirement', 'specification']))
-@click.option('--id', help='ID for the new item')
+@click.option('--id', help='ID suffix for the new item (REQ-/SPEC- prefix will be added automatically)')
 @click.option('--title', help='Title for the new item')
 @click.option('--req-type', help='Type of requirement (functional, security, etc.)')
 @click.option('--output', '-o', help='Output file path')
@@ -264,7 +264,18 @@ def create(type: str, id: Optional[str], title: Optional[str], req_type: Optiona
     """Create a new requirement or specification"""
     
     if not id:
-        id = click.prompt(f"Enter {type} ID")
+        if type == 'requirement':
+            id_suffix = click.prompt("Enter requirement ID (without REQ- prefix)", default="SYS-001")
+            id = f"REQ-{id_suffix}"
+        else:  # specification
+            id_suffix = click.prompt("Enter specification ID (without SPEC- prefix)", default="SYS-001")
+            id = f"SPEC-{id_suffix}"
+    else:
+        # If ID is provided via option, ensure it has the correct prefix
+        if type == 'requirement' and not id.startswith("REQ-"):
+            id = f"REQ-{id}"
+        elif type == 'specification' and not id.startswith("SPEC-"):
+            id = f"SPEC-{id}"
     
     if not title:
         title = click.prompt(f"Enter {type} title")

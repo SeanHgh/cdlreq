@@ -28,12 +28,14 @@ Create a new requirement:
 ```bash
 cdlreq create requirement --type functional
 ```
+You'll be prompted to enter the ID suffix (e.g., "SYS-001") and the "REQ-" prefix will be added automatically.
 
 Create a new specification with interactive requirement selection:
 ```bash
 cdlreq create specification
 ```
 The CLI will show existing requirements and let you select them by number (e.g., '1,3,5' or '1-3,5').
+You'll be prompted to enter the ID suffix (e.g., "SYS-001") and the "SPEC-" prefix will be added automatically.
 
 Validate all files:
 ```bash
