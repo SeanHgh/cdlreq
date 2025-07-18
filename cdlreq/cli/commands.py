@@ -7,6 +7,7 @@ from typing import List, Optional
 from ..core.models import Requirement, Specification
 from ..core.parser import ProjectParser, RequirementParser, SpecificationParser
 from ..core.validator import RequirementValidator, SpecificationValidator, CrossReferenceValidator
+from ..core.exporter import TraceabilityMatrixExporter
 
 
 def load_existing_requirements(directory: Path) -> List[Requirement]:
@@ -380,6 +381,56 @@ def create(type: str, id: Optional[str], title: Optional[str], req_type: Optiona
         parser.save_specification(spec, output_path)
         
         click.echo(f"Created specification: {output}")
+
+
+@cli.command()
+@click.option('--directory', '-d', default='.', help='Directory to export from')
+@click.option('--output', '-o', default='traceability_matrix.xlsx', help='Output Excel file path')
+def export(directory: str, output: str):
+    """Export requirements and specifications to Excel traceability matrix"""
+    project_path = Path(directory)
+    
+    if not project_path.exists():
+        click.echo(f"Error: Directory {directory} does not exist", err=True)
+        return
+    
+    try:
+        # Load requirements and specifications
+        parser = ProjectParser()
+        requirements = parser.req_parser.parse_requirements_directory(project_path)
+        specifications = parser.spec_parser.parse_specifications_directory(project_path)
+        
+        if not requirements and not specifications:
+            click.echo("No requirements or specifications found in the project directory.", err=True)
+            return
+        
+        click.echo(f"Found {len(requirements)} requirements and {len(specifications)} specifications")
+        
+        # Create output path
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Export to Excel
+        exporter = TraceabilityMatrixExporter(requirements, specifications)
+        exporter.export_to_excel(output_path)
+        
+        click.echo(f"✅ Traceability matrix exported to: {output_path}")
+        click.echo(f"📊 Excel file contains {len(requirements)} requirements and {len(specifications)} specifications")
+        
+        # Summary statistics
+        if requirements and specifications:
+            traced_reqs = set()
+            for spec in specifications:
+                traced_reqs.update(spec.related_requirements)
+            
+            untraced_count = len(requirements) - len(traced_reqs)
+            if untraced_count > 0:
+                click.echo(click.style(f"⚠️  {untraced_count} requirement(s) have no specifications", fg="yellow"))
+            else:
+                click.echo(click.style("✅ All requirements have specifications", fg="green"))
+    
+    except Exception as e:
+        click.echo(f"Error during export: {e}", err=True)
 
 
 def main():

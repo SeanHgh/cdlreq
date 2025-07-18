@@ -8,6 +8,7 @@ A Python library and CLI for managing medical software requirements and specific
 - **Traceability**: Link requirements to specifications, implementation units, and tests
 - **Interactive Selection**: Select existing requirements by number when creating specifications
 - **Validation**: Schema validation ensures data integrity
+- **Excel Export**: Generate traceability matrix in Excel format for compliance documentation
 - **CLI Interface**: Command-line tools for common operations
 - **Python Library**: Programmatic access to requirements and specifications
 
@@ -41,6 +42,12 @@ Validate all files:
 ```bash
 cdlreq validate
 ```
+
+Export traceability matrix to Excel:
+```bash
+cdlreq export --output traceability_matrix.xlsx
+```
+Creates an Excel file with requirements, specifications, and a traceability matrix showing relationships.
 
 ## Directory Structure
 
