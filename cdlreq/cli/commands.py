@@ -2,11 +2,68 @@
 
 import click
 import yaml
+import inquirer
 from pathlib import Path
 from typing import List, Optional
 from ..core.models import Requirement, Specification
 from ..core.parser import ProjectParser, RequirementParser, SpecificationParser
 from ..core.validator import RequirementValidator, SpecificationValidator, CrossReferenceValidator
+
+
+def load_existing_requirements(directory: Path) -> List[Requirement]:
+    """Load existing requirements from the project directory"""
+    try:
+        parser = RequirementParser()
+        return parser.parse_requirements_directory(directory)
+    except Exception:
+        return []
+
+
+def interactive_requirement_selection(existing_requirements: List[Requirement]) -> List[str]:
+    """Interactive selection of existing requirements with autocomplete"""
+    if not existing_requirements:
+        click.echo("No existing requirements found. Please enter requirement IDs manually.")
+        related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
+        return [req.strip() for req in related_requirements if req.strip()]
+    
+    # Create choices with ID and title for better selection
+    choices = []
+    req_map = {}
+    for req in existing_requirements:
+        display_text = f"{req.id} - {req.title}"
+        choices.append(display_text)
+        req_map[display_text] = req.id
+    
+    # Add option to enter manually
+    choices.append("Enter requirement IDs manually")
+    
+    try:
+        questions = [
+            inquirer.Checkbox(
+                'requirements',
+                message='Select related requirements (use SPACE to select, ENTER to confirm)',
+                choices=choices,
+                default=[]
+            )
+        ]
+        
+        answers = inquirer.prompt(questions)
+        if not answers:  # User cancelled
+            return []
+        
+        selected = answers['requirements']
+        
+        # Check if user chose manual entry
+        if "Enter requirement IDs manually" in selected:
+            related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
+            return [req.strip() for req in related_requirements if req.strip()]
+        
+        # Convert display text back to IDs
+        return [req_map[choice] for choice in selected]
+    
+    except (KeyboardInterrupt, EOFError):
+        click.echo("\nOperation cancelled.")
+        return []
 
 
 @click.group()
@@ -241,8 +298,17 @@ def create(type: str, id: Optional[str], title: Optional[str], req_type: Optiona
     
     else:  # specification
         description = click.prompt("Enter specification description")
-        related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
-        related_requirements = [req.strip() for req in related_requirements if req.strip()]
+        
+        # Load existing requirements for interactive selection
+        current_dir = Path.cwd()
+        existing_requirements = load_existing_requirements(current_dir)
+        
+        click.echo(f"\nFound {len(existing_requirements)} existing requirements.")
+        related_requirements = interactive_requirement_selection(existing_requirements)
+        
+        if not related_requirements:
+            click.echo("Error: At least one related requirement must be specified.", err=True)
+            return
         
         implementation_unit = click.prompt("Enter implementation unit path")
         unit_test = click.prompt("Enter unit test path")
