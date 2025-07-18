@@ -95,45 +95,89 @@ class TraceabilityMatrixExporter:
         # Title
         ws.cell(row=1, column=1, value="Requirements to Specifications Traceability Matrix")
         ws.cell(row=1, column=1).font = Font(bold=True, size=14)
-        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(self.specifications) + 3)
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=8)
         
         # Headers
         ws.cell(row=3, column=1, value="Requirement ID")
         ws.cell(row=3, column=2, value="Requirement Title")
-        ws.cell(row=3, column=3, value="Type")
-        
-        # Specification headers
-        for col, spec in enumerate(self.specifications, 4):
-            cell = ws.cell(row=3, column=col, value=spec.id)
-            cell.font = Font(bold=True)
-            # Rotate text for better fit
-            cell.alignment = Alignment(text_rotation=90)
+        ws.cell(row=3, column=3, value="Requirement Type")
+        ws.cell(row=3, column=4, value="Specification ID")
+        ws.cell(row=3, column=5, value="Specification Title")
+        ws.cell(row=3, column=6, value="Implementation Unit")
+        ws.cell(row=3, column=7, value="Unit Test")
+        ws.cell(row=3, column=8, value="Design Notes")
         
         # Style header row
-        for col in range(1, len(self.specifications) + 4):
+        for col in range(1, 9):
             cell = ws.cell(row=3, column=col)
             cell.font = Font(bold=True)
             cell.fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
         
+        # Build requirement to specifications mapping
+        req_to_specs = {}
+        for spec in self.specifications:
+            for req_id in spec.related_requirements:
+                if req_id not in req_to_specs:
+                    req_to_specs[req_id] = []
+                req_to_specs[req_id].append(spec)
+        
         # Data rows
-        for row, req in enumerate(self.requirements, 4):
-            ws.cell(row=row, column=1, value=req.id)
-            ws.cell(row=row, column=2, value=req.title)
-            ws.cell(row=row, column=3, value=req.type)
+        current_row = 4
+        for req in self.requirements:
+            related_specs = req_to_specs.get(req.id, [])
             
-            # Mark specifications that implement this requirement
-            for col, spec in enumerate(self.specifications, 4):
-                if req.id in spec.related_requirements:
-                    cell = ws.cell(row=row, column=col, value="✓")
-                    cell.font = Font(bold=True, color="00AA00")
-                    cell.alignment = Alignment(horizontal="center")
-                    cell.fill = PatternFill(start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
-                else:
-                    cell = ws.cell(row=row, column=col, value="")
-                    cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+            if not related_specs:
+                # Requirement with no specifications
+                ws.cell(row=current_row, column=1, value=req.id)
+                ws.cell(row=current_row, column=2, value=req.title)
+                ws.cell(row=current_row, column=3, value=req.type)
+                ws.cell(row=current_row, column=4, value="No specifications")
+                
+                # Style untraced requirement
+                for col in range(1, 9):
+                    cell = ws.cell(row=current_row, column=col)
+                    cell.fill = PatternFill(start_color="FFE6E6", end_color="FFE6E6", fill_type="solid")
+                
+                current_row += 1
+            else:
+                # Requirement with specifications
+                start_row = current_row
+                
+                for i, spec in enumerate(related_specs):
+                    if i == 0:
+                        # First specification - add requirement info
+                        ws.cell(row=current_row, column=1, value=req.id)
+                        ws.cell(row=current_row, column=2, value=req.title)
+                        ws.cell(row=current_row, column=3, value=req.type)
+                    
+                    # Add specification info
+                    ws.cell(row=current_row, column=4, value=spec.id)
+                    ws.cell(row=current_row, column=5, value=spec.title)
+                    ws.cell(row=current_row, column=6, value=spec.implementation_unit)
+                    ws.cell(row=current_row, column=7, value=spec.unit_test)
+                    ws.cell(row=current_row, column=8, value=spec.design_notes or "")
+                    
+                    # Style traced requirement-specification pair
+                    for col in range(1, 9):
+                        cell = ws.cell(row=current_row, column=col)
+                        cell.fill = PatternFill(start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
+                    
+                    current_row += 1
+                
+                # Merge requirement cells if multiple specifications
+                if len(related_specs) > 1:
+                    end_row = current_row - 1
+                    ws.merge_cells(start_row=start_row, start_column=1, end_row=end_row, end_column=1)
+                    ws.merge_cells(start_row=start_row, start_column=2, end_row=end_row, end_column=2)
+                    ws.merge_cells(start_row=start_row, start_column=3, end_row=end_row, end_column=3)
+                    
+                    # Center align merged cells
+                    for col in range(1, 4):
+                        cell = ws.cell(row=start_row, column=col)
+                        cell.alignment = Alignment(horizontal="center", vertical="center")
         
         # Add borders
-        self._add_borders(ws, 3, 1, len(self.requirements) + 3, len(self.specifications) + 3)
+        self._add_borders(ws, 3, 1, current_row - 1, 8)
         
         # Auto-adjust column widths
         self._auto_adjust_columns(ws)

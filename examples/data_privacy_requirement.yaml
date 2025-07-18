@@ -1,0 +1,17 @@
+id: REQ-PRI-001
+title: Data Privacy Protection
+description: The system must protect patient data privacy in accordance with HIPAA regulations and ensure that personal health information is encrypted and access-controlled.
+type: security
+acceptance_criteria:
+  - All patient data must be encrypted at rest using AES-256 encryption
+  - Access to patient data requires proper authentication and authorization
+  - Data access must be logged and auditable
+  - Patient consent must be obtained before data sharing
+  - Data retention policies must be enforced automatically
+tags:
+  - privacy
+  - hipaa
+  - encryption
+  - audit
+source: "HIPAA Security Rule, 45 CFR 164.312"
+rationale: "HIPAA compliance is mandatory for medical software systems handling protected health information (PHI)."

@@ -1,0 +1,19 @@
+id: REQ-PER-001
+title: System Performance and Scalability
+description: The system must maintain optimal performance under normal and peak load conditions to ensure reliable operation in critical medical environments.
+type: performance
+acceptance_criteria:
+  - System response time must be less than 2 seconds for 95% of operations
+  - System must support concurrent access by up to 500 users
+  - Database queries must complete within 1 second for standard operations
+  - System uptime must be 99.9% or higher
+  - Data backup operations must complete within 4 hours
+  - System must gracefully handle peak loads during shift changes
+tags:
+  - performance
+  - scalability
+  - uptime
+  - response-time
+  - concurrent-users
+source: "ISO 25010 Quality Model - Performance Efficiency"
+rationale: "Performance requirements are critical for medical systems where delays can impact patient care and safety."
