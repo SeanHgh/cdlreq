@@ -6,7 +6,7 @@ A Python library and CLI for managing medical software requirements and specific
 
 - **YAML-based**: Requirements and specifications stored in structured YAML files
 - **Traceability**: Link requirements to specifications, implementation units, and tests
-- **Interactive Selection**: Use keyboard navigation to select existing requirements when creating specifications
+- **Interactive Selection**: Select existing requirements by number when creating specifications
 - **Validation**: Schema validation ensures data integrity
 - **CLI Interface**: Command-line tools for common operations
 - **Python Library**: Programmatic access to requirements and specifications
@@ -33,7 +33,7 @@ Create a new specification with interactive requirement selection:
 ```bash
 cdlreq create specification
 ```
-The CLI will show existing requirements and let you select them using keyboard navigation.
+The CLI will show existing requirements and let you select them by number (e.g., '1,3,5' or '1-3,5').
 
 Validate all files:
 ```bash

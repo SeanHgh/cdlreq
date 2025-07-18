@@ -2,7 +2,6 @@
 
 import click
 import yaml
-import inquirer
 from pathlib import Path
 from typing import List, Optional
 from ..core.models import Requirement, Specification
@@ -20,50 +19,58 @@ def load_existing_requirements(directory: Path) -> List[Requirement]:
 
 
 def interactive_requirement_selection(existing_requirements: List[Requirement]) -> List[str]:
-    """Interactive selection of existing requirements with autocomplete"""
+    """Interactive selection of existing requirements"""
     if not existing_requirements:
         click.echo("No existing requirements found. Please enter requirement IDs manually.")
         related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
         return [req.strip() for req in related_requirements if req.strip()]
     
-    # Create choices with ID and title for better selection
-    choices = []
-    req_map = {}
-    for req in existing_requirements:
-        display_text = f"{req.id} - {req.title}"
-        choices.append(display_text)
-        req_map[display_text] = req.id
+    click.echo("\nExisting requirements:")
+    for i, req in enumerate(existing_requirements, 1):
+        click.echo(f"  {i}. {req.id} - {req.title}")
     
-    # Add option to enter manually
-    choices.append("Enter requirement IDs manually")
+    click.echo("\nSelect requirements by number (e.g., '1,3,5' or '1-3,5'):")
+    click.echo("Or press ENTER to enter requirement IDs manually")
+    
+    selection = click.prompt("Selection", default="", show_default=False)
+    
+    if not selection.strip():
+        # Manual entry
+        related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
+        return [req.strip() for req in related_requirements if req.strip()]
     
     try:
-        questions = [
-            inquirer.Checkbox(
-                'requirements',
-                message='Select related requirements (use SPACE to select, ENTER to confirm)',
-                choices=choices,
-                default=[]
-            )
-        ]
+        selected_ids = []
+        parts = selection.split(',')
         
-        answers = inquirer.prompt(questions)
-        if not answers:  # User cancelled
-            return []
+        for part in parts:
+            part = part.strip()
+            if '-' in part:
+                # Handle ranges like "1-3"
+                start, end = part.split('-', 1)
+                start_idx = int(start.strip()) - 1
+                end_idx = int(end.strip()) - 1
+                for idx in range(start_idx, end_idx + 1):
+                    if 0 <= idx < len(existing_requirements):
+                        selected_ids.append(existing_requirements[idx].id)
+            else:
+                # Handle single numbers
+                idx = int(part) - 1
+                if 0 <= idx < len(existing_requirements):
+                    selected_ids.append(existing_requirements[idx].id)
         
-        selected = answers['requirements']
+        # Remove duplicates while preserving order
+        unique_ids = []
+        for req_id in selected_ids:
+            if req_id not in unique_ids:
+                unique_ids.append(req_id)
         
-        # Check if user chose manual entry
-        if "Enter requirement IDs manually" in selected:
-            related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
-            return [req.strip() for req in related_requirements if req.strip()]
-        
-        # Convert display text back to IDs
-        return [req_map[choice] for choice in selected]
+        return unique_ids
     
-    except (KeyboardInterrupt, EOFError):
-        click.echo("\nOperation cancelled.")
-        return []
+    except (ValueError, IndexError):
+        click.echo("Invalid selection. Please enter requirement IDs manually.")
+        related_requirements = click.prompt("Enter related requirement IDs (comma-separated)").split(',')
+        return [req.strip() for req in related_requirements if req.strip()]
 
 
 @click.group()
