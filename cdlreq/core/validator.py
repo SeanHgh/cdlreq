@@ -105,6 +105,17 @@ class CrossReferenceValidator:
         
         return ValidationResult(len(errors) == 0, errors)
     
+    def get_missing_requirement_links(self) -> List[tuple]:
+        """Get list of (specification_id, missing_requirement_id) tuples for warnings"""
+        missing_links = []
+        
+        for spec in self.specifications.values():
+            for req_id in spec.related_requirements:
+                if req_id not in self.requirements:
+                    missing_links.append((spec.id, req_id))
+        
+        return missing_links
+    
     def _find_circular_dependencies(self) -> List[List[str]]:
         """Find circular dependencies in specifications"""
         visited = set()

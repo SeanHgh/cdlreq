@@ -175,17 +175,36 @@ def validate(directory: str, requirements_only: bool, specifications_only: bool)
             errors.append(f"Error parsing specifications: {e}")
     
     # Cross-reference validation
+    warnings = []
     if not requirements_only and not specifications_only:
         try:
             requirements = parser.req_parser.parse_requirements_directory(project_path)
             specifications = parser.spec_parser.parse_specifications_directory(project_path)
             
             cross_validator = CrossReferenceValidator(requirements, specifications)
+            
+            # Check for missing requirement links (warnings)
+            missing_links = cross_validator.get_missing_requirement_links()
+            for spec_id, missing_req_id in missing_links:
+                warnings.append(f"Specification {spec_id} references non-existent requirement {missing_req_id}")
+            
+            # Check for other cross-reference errors
             result = cross_validator.validate_cross_references()
             if not result.is_valid:
-                errors.extend(result.errors)
+                # Filter out missing requirement errors since we show them as warnings
+                filtered_errors = [error for error in result.errors 
+                                 if not error.startswith("Specification") or "references non-existent requirement" not in error]
+                errors.extend(filtered_errors)
         except Exception as e:
             errors.append(f"Error in cross-reference validation: {e}")
+    
+    # Display warnings in orange/yellow
+    if warnings:
+        click.echo()
+        click.echo(click.style("⚠️  Warnings:", fg="bright_yellow", bold=True))
+        for warning in warnings:
+            click.echo(click.style(f"  - {warning}", fg="bright_yellow"))
+        click.echo()
     
     if errors:
         click.echo("Validation failed:", err=True)
@@ -193,7 +212,10 @@ def validate(directory: str, requirements_only: bool, specifications_only: bool)
             click.echo(f"  - {error}", err=True)
         exit(1)
     else:
-        click.echo("Validation successful!")
+        success_msg = "Validation successful!"
+        if warnings:
+            success_msg += f" ({len(warnings)} warning{'s' if len(warnings) > 1 else ''})"
+        click.echo(click.style(success_msg, fg="green", bold=True))
 
 
 @cli.command()
