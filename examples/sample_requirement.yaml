@@ -1,0 +1,18 @@
+id: "REQ-SEC-001"
+title: "User authentication with multi-factor authentication"
+description: "The system must provide secure user authentication using multi-factor authentication (MFA) to ensure only authorized users can access the medical software system."
+type: "security"
+acceptance_criteria:
+  - "User can log in with valid username and password"
+  - "System prompts for second factor authentication after successful password verification"
+  - "User must provide valid second factor (SMS, authenticator app, or hardware token)"
+  - "Invalid credentials are rejected with appropriate error message"
+  - "Account is locked after 3 consecutive failed login attempts"
+  - "Locked accounts can be unlocked by administrator"
+tags:
+  - "authentication"
+  - "security"
+  - "mfa"
+  - "access-control"
+source: "ISO 27001:2013 - Information Security Management"
+rationale: "Multi-factor authentication is required to meet regulatory compliance for medical software systems handling patient data."
