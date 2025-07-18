@@ -199,20 +199,36 @@ class TraceabilityMatrixExporter:
     
     def _auto_adjust_columns(self, ws: Worksheet) -> None:
         """Auto-adjust column widths based on content"""
-        for column in ws.columns:
+        from openpyxl.cell.cell import MergedCell
+        from openpyxl.utils import get_column_letter
+        
+        # Get the maximum column index to iterate through
+        max_column = ws.max_column
+        
+        for col_idx in range(1, max_column + 1):
             max_length = 0
-            column_letter = column[0].column_letter
+            column_letter = get_column_letter(col_idx)
             
-            for cell in column:
+            # Check all cells in this column
+            for row_idx in range(1, ws.max_row + 1):
+                cell = ws.cell(row=row_idx, column=col_idx)
+                
+                # Skip merged cells
+                if isinstance(cell, MergedCell):
+                    continue
+                
                 try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
+                    if cell.value is not None:
+                        cell_length = len(str(cell.value))
+                        if cell_length > max_length:
+                            max_length = cell_length
                 except:
                     pass
             
             # Set width with some padding, but cap at reasonable maximum
             adjusted_width = min(max_length + 2, 50)
-            ws.column_dimensions[column_letter].width = adjusted_width
+            if adjusted_width > 0:  # Only set width if we found content
+                ws.column_dimensions[column_letter].width = adjusted_width
     
     def _add_borders(self, ws: Worksheet, start_row: int, start_col: int, end_row: int, end_col: int) -> None:
         """Add borders to a range of cells"""
