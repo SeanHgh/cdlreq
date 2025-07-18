@@ -66,12 +66,18 @@ class RequirementParser(BaseParser):
     def parse_requirements_directory(self, directory: Path) -> List[Requirement]:
         """Parse all requirement files in a directory"""
         requirements = []
-        for file_path in directory.glob("**/*req*.yaml"):
+        for file_path in directory.glob("**/*.yaml"):
             try:
-                req = self.parse_requirement_file(file_path)
-                requirements.append(req)
+                # Check if this is a requirement file by looking at the ID field
+                data = self.parse_yaml_file(file_path)
+                if isinstance(data, dict) and data.get("id", "").startswith("REQ-"):
+                    req = self.parse_requirement_file(file_path)
+                    requirements.append(req)
             except ParseError as e:
                 print(f"Warning: Skipping {file_path}: {e}")
+            except Exception:
+                # Skip non-requirement files silently
+                pass
         return requirements
 
 
@@ -110,12 +116,18 @@ class SpecificationParser(BaseParser):
     def parse_specifications_directory(self, directory: Path) -> List[Specification]:
         """Parse all specification files in a directory"""
         specifications = []
-        for file_path in directory.glob("**/*spec*.yaml"):
+        for file_path in directory.glob("**/*.yaml"):
             try:
-                spec = self.parse_specification_file(file_path)
-                specifications.append(spec)
+                # Check if this is a specification file by looking at the ID field
+                data = self.parse_yaml_file(file_path)
+                if isinstance(data, dict) and data.get("id", "").startswith("SPEC-"):
+                    spec = self.parse_specification_file(file_path)
+                    specifications.append(spec)
             except ParseError as e:
                 print(f"Warning: Skipping {file_path}: {e}")
+            except Exception:
+                # Skip non-specification files silently
+                pass
         return specifications
 
 

@@ -35,19 +35,21 @@ cdlreq validate
 
 ## YAML Structure
 
-### Requirements
-- `id`: Unique identifier
+### Requirements (REQ-XXX-###)
+- `id`: Unique identifier starting with "REQ-"
 - `title`: Brief description
 - `description`: Detailed description
 - `type`: functional, security, performance, usability, etc.
 - `tags`: List of tags
 - `acceptance_criteria`: List of acceptance criteria
 
-### Specifications  
-- `id`: Unique identifier
+### Specifications (SPEC-XXX-###)
+- `id`: Unique identifier starting with "SPEC-"
 - `title`: Brief description
 - `description`: Detailed description
 - `related_requirements`: List of requirement IDs
 - `implementation_unit`: Path to source code file/module
 - `unit_test`: Path to test file/function
 - `test_criteria`: List of test criteria
+
+Files are automatically identified by their ID prefix - no special file naming conventions required.
