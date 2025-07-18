@@ -67,16 +67,20 @@ class RequirementParser(BaseParser):
         """Parse all requirement files in a directory"""
         requirements = []
         for file_path in directory.glob("**/*.yaml"):
+            data = None
             try:
                 # Check if this is a requirement file by looking at the ID field
                 data = self.parse_yaml_file(file_path)
                 if isinstance(data, dict) and data.get("id", "").startswith("REQ-"):
-                    req = self.parse_requirement_file(file_path)
+                    # Try to create requirement object directly, skipping schema validation for parsing
+                    req = self.create_requirement_from_data(data)
                     requirements.append(req)
             except ParseError as e:
                 print(f"Warning: Skipping {file_path}: {e}")
-            except Exception:
-                # Skip non-requirement files silently
+            except Exception as e:
+                # Skip non-requirement files silently, but log validation errors
+                if data and isinstance(data, dict) and data.get("id", "").startswith("REQ-"):
+                    print(f"Warning: Skipping {file_path}: {e}")
                 pass
         return requirements
 
@@ -117,16 +121,20 @@ class SpecificationParser(BaseParser):
         """Parse all specification files in a directory"""
         specifications = []
         for file_path in directory.glob("**/*.yaml"):
+            data = None
             try:
                 # Check if this is a specification file by looking at the ID field
                 data = self.parse_yaml_file(file_path)
                 if isinstance(data, dict) and data.get("id", "").startswith("SPEC-"):
-                    spec = self.parse_specification_file(file_path)
+                    # Try to create specification object directly, skipping schema validation for parsing
+                    spec = self.create_specification_from_data(data)
                     specifications.append(spec)
             except ParseError as e:
                 print(f"Warning: Skipping {file_path}: {e}")
-            except Exception:
-                # Skip non-specification files silently
+            except Exception as e:
+                # Skip non-specification files silently, but log validation errors
+                if data and isinstance(data, dict) and data.get("id", "").startswith("SPEC-"):
+                    print(f"Warning: Skipping {file_path}: {e}")
                 pass
         return specifications
 

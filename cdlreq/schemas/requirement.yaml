@@ -15,12 +15,12 @@ properties:
     description: "Unique requirement identifier (e.g., REQ-SYS-001)"
   title:
     type: "string"
-    minLength: 5
+    minLength: 1
     maxLength: 100
     description: "Brief requirement title"
   description:
     type: "string"
-    minLength: 10
+    minLength: 1
     description: "Detailed requirement description"
   type:
     type: "string"
