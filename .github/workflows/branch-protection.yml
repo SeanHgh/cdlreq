@@ -27,7 +27,8 @@ jobs:
                   { context: 'test (3.10)' },
                   { context: 'test (3.11)' },
                   { context: 'test (3.12)' },
-                  { context: 'format' }
+                  { context: 'all-checks-passed' },
+                  { context: 'coverage-validation-summary' }
                 ]
               },
               enforce_admins: true,
@@ -47,5 +48,5 @@ jobs:
           } catch (error) {
             console.log('ℹ️ Branch protection update failed (may require admin permissions):', error.message);
             console.log('💡 Please manually configure branch protection rules in GitHub repository settings');
-            console.log('Required status checks: test (3.9), test (3.10), test (3.11), test (3.12), format');
+            console.log('Required status checks: test (3.9), test (3.10), test (3.11), test (3.12), all-checks-passed, coverage-validation-summary');
           }

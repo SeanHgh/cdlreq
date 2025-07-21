@@ -22,10 +22,15 @@ This repository uses GitHub Actions to automatically run tests and prevent mergi
   - Test coverage validation (minimum 80%)
 - **Status**: Provides single "all-checks-passed" status for branch protection
 
-### 3. `format.yml` - Automatic Code Formatting
-- **Triggers**: Pull requests and pushes to main branch
-- **Purpose**: Ensures consistent code formatting
-- **Features**: Auto-formats code with ruff if needed
+### 3. `coverage-validation.yml` - Specification Test Coverage
+- **Triggers**: Pull requests to main branch (when not draft)
+- **Purpose**: Ensures all specification unit test paths are executed
+- **Features**:
+  - Runs pytest and captures output
+  - Uses `cdlreq coverage` command to analyze test execution
+  - Comments on PR with detailed coverage results
+  - **Blocks merge** if any specification unit tests are not executed or invalid
+- **Validation**: All unit test files referenced in specifications must be executed
 
 ### 4. `branch-protection.yml` - Branch Protection Setup
 - **Triggers**: Manual workflow dispatch
@@ -43,11 +48,11 @@ If the automatic branch protection setup fails, manually configure these rules i
    - ✅ **Require branches to be up to date before merging**
    - Required status checks:
      - `all-checks-passed` (from pr-checks.yml)
+     - `coverage-validation-summary` (from coverage-validation.yml)
      - `test (3.9)` (from test.yml)
      - `test (3.10)` (from test.yml)
      - `test (3.11)` (from test.yml)
      - `test (3.12)` (from test.yml)
-     - `format` (from format.yml)
    - ✅ **Require a pull request before merging**
    - ✅ **Require approvals** (1 reviewer minimum)
    - ✅ **Dismiss stale reviews when new commits are pushed**
@@ -91,6 +96,18 @@ The branch protection ensures that:
 2. **Code must be properly formatted** with ruff
 3. **Linting must pass** with no errors
 4. **Test coverage must be ≥80%**
-5. **Pull request must be approved** by at least 1 reviewer
+5. **All specification unit tests must be executed** (cdlreq coverage validation)
+6. **Pull request must be approved** by at least 1 reviewer
 
 Pull requests that fail any of these checks **cannot be merged** until issues are resolved.
+
+## Coverage Validation Details
+
+The `coverage-validation.yml` workflow ensures that:
+- ✅ All unit test file paths referenced in specifications exist
+- ✅ All unit test files referenced in specifications are executed during PR testing
+- ✅ No specification has invalid or broken unit test paths
+- 💬 Detailed coverage results are posted as PR comments
+- ❌ **PRs are blocked** if any specification unit tests are missing or not executed
+
+This prevents specifications from referencing non-existent or untested code files.
