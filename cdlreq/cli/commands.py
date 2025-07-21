@@ -523,10 +523,26 @@ def coverage(test_output_file: str, directory: str):
         parser = ProjectParser()
         specs = parser.spec_parser.parse_specifications_directory(Path(directory))
         
-        # Get all unit test paths from specs
-        spec_tests = {spec.unit_test for spec in specs if hasattr(spec, 'unit_test') and spec.unit_test}
+        # Get all unit test paths from specs and check file existence
+        spec_tests = set()
+        invalid_files = {}  # Maps test_path -> list of spec IDs
+        test_to_specs = {}  # Maps test_path -> list of spec IDs for all valid tests
         
-        if not spec_tests:
+        for spec in specs:
+            if hasattr(spec, 'unit_test') and spec.unit_test:
+                test_path = spec.unit_test
+                # Check if the test file actually exists
+                if Path(test_path).exists():
+                    spec_tests.add(test_path)
+                    if test_path not in test_to_specs:
+                        test_to_specs[test_path] = []
+                    test_to_specs[test_path].append(spec.id)
+                else:
+                    if test_path not in invalid_files:
+                        invalid_files[test_path] = []
+                    invalid_files[test_path].append(spec.id)
+        
+        if not spec_tests and not invalid_files:
             click.echo("No unit tests found in specifications")
             return
 
@@ -541,17 +557,30 @@ def coverage(test_output_file: str, directory: str):
                 not_executed.add(test_path)
 
         # Display results
+        if invalid_files:
+            click.echo(click.style("⚠️  Invalid test files (do not exist):", fg="yellow", bold=True))
+            for test_path in sorted(invalid_files.keys()):
+                spec_ids = ", ".join(invalid_files[test_path])
+                click.echo(f"  {test_path} → used in: {spec_ids}")
+            click.echo()
+
         if executed:
             click.echo(click.style("✅ Executed tests:", fg="green"))
             for test in sorted(executed):
-                click.echo(f"  {test}")
+                spec_ids = ", ".join(test_to_specs[test])
+                click.echo(f"  {test} → used in: {spec_ids}")
         
         if not_executed:
             click.echo(click.style("❌ Not executed:", fg="red"))
             for test in sorted(not_executed):
-                click.echo(f"  {test}")
+                spec_ids = ", ".join(test_to_specs[test])
+                click.echo(f"  {test} → used in: {spec_ids}")
 
-        click.echo(f"\n{len(executed)}/{len(spec_tests)} specification tests executed")
+        # Summary
+        total_spec_tests = len(spec_tests) + len(invalid_files)
+        click.echo(f"\n{len(executed)}/{len(spec_tests)} valid tests executed")
+        if invalid_files:
+            click.echo(f"{len(invalid_files)} invalid test file(s) in specifications")
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
