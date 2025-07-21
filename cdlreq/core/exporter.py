@@ -3,10 +3,21 @@
 from pathlib import Path
 from typing import List, Dict, Any
 from datetime import datetime
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.worksheet.worksheet import Worksheet
 from .models import Requirement, Specification
+
+try:
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.worksheet.worksheet import Worksheet
+    OPENPYXL_AVAILABLE = True
+except ImportError:
+    OPENPYXL_AVAILABLE = False
+    # Create dummy classes for type hints when openpyxl is not available
+    class openpyxl:
+        class Workbook:
+            pass
+    class Worksheet:
+        pass
 
 
 class TraceabilityMatrixExporter:
@@ -22,6 +33,9 @@ class TraceabilityMatrixExporter:
 
     def export_to_excel(self, output_path: Path) -> None:
         """Export traceability matrix to Excel file"""
+        if not OPENPYXL_AVAILABLE:
+            raise ImportError("openpyxl is required for Excel export. Install with: pip install openpyxl")
+        
         workbook = openpyxl.Workbook()
 
         # Remove default sheet and create our sheets

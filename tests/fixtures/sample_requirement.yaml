@@ -1,0 +1,11 @@
+id: "REQ-TEST-001"
+title: "Test requirement for authentication"
+description: "The system must authenticate users securely using industry-standard methods"
+type: "security"
+acceptance_criteria:
+  - "User can log in with valid credentials"
+  - "Invalid credentials are rejected"
+  - "Account lockout after failed attempts"
+tags:
+  - "authentication"
+  - "security"
