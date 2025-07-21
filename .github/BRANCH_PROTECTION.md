@@ -22,17 +22,7 @@ This repository uses GitHub Actions to automatically run tests and prevent mergi
   - Test coverage validation (minimum 80%)
 - **Status**: Provides single "all-checks-passed" status for branch protection
 
-### 3. `coverage-validation.yml` - Specification Test Coverage
-- **Triggers**: Pull requests to main branch (when not draft)
-- **Purpose**: Ensures all specification unit test paths are executed
-- **Features**:
-  - Runs pytest and captures output
-  - Uses `cdlreq coverage` command to analyze test execution
-  - Comments on PR with detailed coverage results
-  - **Blocks merge** if any specification unit tests are not executed or invalid
-- **Validation**: All unit test files referenced in specifications must be executed
-
-### 4. `branch-protection.yml` - Branch Protection Setup
+### 3. `branch-protection.yml` - Branch Protection Setup
 - **Triggers**: Manual workflow dispatch
 - **Purpose**: Automatically configure branch protection rules
 - **Note**: May require admin permissions
@@ -48,7 +38,6 @@ If the automatic branch protection setup fails, manually configure these rules i
    - ✅ **Require branches to be up to date before merging**
    - Required status checks:
      - `all-checks-passed` (from pr-checks.yml)
-     - `coverage-validation-summary` (from coverage-validation.yml)
      - `test (3.9)` (from test.yml)
      - `test (3.10)` (from test.yml)
      - `test (3.11)` (from test.yml)
@@ -96,18 +85,6 @@ The branch protection ensures that:
 2. **Code must be properly formatted** with ruff
 3. **Linting must pass** with no errors
 4. **Test coverage must be ≥80%**
-5. **All specification unit tests must be executed** (cdlreq coverage validation)
-6. **Pull request must be approved** by at least 1 reviewer
+5. **Pull request must be approved** by at least 1 reviewer
 
 Pull requests that fail any of these checks **cannot be merged** until issues are resolved.
-
-## Coverage Validation Details
-
-The `coverage-validation.yml` workflow ensures that:
-- ✅ All unit test file paths referenced in specifications exist
-- ✅ All unit test files referenced in specifications are executed during PR testing
-- ✅ No specification has invalid or broken unit test paths
-- 💬 Detailed coverage results are posted as PR comments
-- ❌ **PRs are blocked** if any specification unit tests are missing or not executed
-
-This prevents specifications from referencing non-existent or untested code files.
