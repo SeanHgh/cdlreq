@@ -510,73 +510,52 @@ def export(directory: str, output: str):
 
 
 @cli.command()
-@click.argument("test_file", type=click.Path(exists=True))
-@click.option("--directory", "-d", default=".", help="Project directory to analyze")
-def coverage(test_file: str, directory: str):
-    """Compare specification unit tests against a test list file to show coverage"""
-    project_path = Path(directory)
-    test_file_path = Path(test_file)
-
-    if not project_path.exists():
-        click.echo(f"Error: Directory {directory} does not exist", err=True)
-        return
-
+@click.argument("test_output_file", type=click.Path(exists=True))
+@click.option("--directory", "-d", default=".", help="Project directory")
+def coverage(test_output_file: str, directory: str):
+    """Check if specification unit tests were executed"""
     try:
-        # Load test list from file
-        with open(test_file_path, 'r') as f:
-            tested_files = set()
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    tested_files.add(line)
+        # Read test output file
+        with open(test_output_file, 'r') as f:
+            test_output = f.read()
 
         # Load specifications
         parser = ProjectParser()
-        specifications = parser.spec_parser.parse_specifications_directory(project_path)
-
-        if not specifications:
-            click.echo("No specifications found in the project directory.", err=True)
+        specs = parser.spec_parser.parse_specifications_directory(Path(directory))
+        
+        # Get all unit test paths from specs
+        spec_tests = {spec.unit_test for spec in specs if hasattr(spec, 'unit_test') and spec.unit_test}
+        
+        if not spec_tests:
+            click.echo("No unit tests found in specifications")
             return
 
-        # Extract unit test paths from specifications
-        spec_test_files = set()
-        spec_by_test = {}
-        for spec in specifications:
-            if hasattr(spec, 'unit_test') and spec.unit_test:
-                spec_test_files.add(spec.unit_test)
-                spec_by_test[spec.unit_test] = spec
-
-        # Determine tested and untested
-        tested_spec_files = spec_test_files.intersection(tested_files)
-        untested_spec_files = spec_test_files - tested_files
+        # Check which tests were executed
+        executed = set()
+        not_executed = set()
+        
+        for test_path in spec_tests:
+            if test_path in test_output:
+                executed.add(test_path)
+            else:
+                not_executed.add(test_path)
 
         # Display results
-        click.echo(f"📊 Test Coverage Analysis")
-        click.echo(f"Found {len(specifications)} specifications with {len(spec_test_files)} unit tests")
-        click.echo(f"Test list contains {len(tested_files)} test files")
-        click.echo()
+        if executed:
+            click.echo(click.style("✅ Executed tests:", fg="green"))
+            for test in sorted(executed):
+                click.echo(f"  {test}")
+        
+        if not_executed:
+            click.echo(click.style("❌ Not executed:", fg="red"))
+            for test in sorted(not_executed):
+                click.echo(f"  {test}")
 
-        if tested_spec_files:
-            click.echo(click.style("✅ TESTED specifications:", fg="green", bold=True))
-            for test_file in sorted(tested_spec_files):
-                spec = spec_by_test[test_file]
-                click.echo(f"  • {test_file} → {spec.id}: {spec.title}")
-            click.echo()
-
-        if untested_spec_files:
-            click.echo(click.style("❌ UNTESTED specifications:", fg="red", bold=True))
-            for test_file in sorted(untested_spec_files):
-                spec = spec_by_test[test_file]
-                click.echo(f"  • {test_file} → {spec.id}: {spec.title}")
-            click.echo()
-
-        # Summary
-        coverage_pct = (len(tested_spec_files) / len(spec_test_files)) * 100 if spec_test_files else 0
-        color = "green" if coverage_pct >= 80 else "yellow" if coverage_pct >= 60 else "red"
-        click.echo(click.style(f"Coverage: {len(tested_spec_files)}/{len(spec_test_files)} ({coverage_pct:.1f}%)", fg=color, bold=True))
+        click.echo(f"\n{len(executed)}/{len(spec_tests)} specification tests executed")
 
     except Exception as e:
-        click.echo(f"Error during coverage analysis: {e}", err=True)
+        click.echo(f"Error: {e}", err=True)
+
 
 
 
