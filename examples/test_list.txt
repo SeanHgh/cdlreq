@@ -1,0 +1,6 @@
+tests/auth/test_oauth_authenticator.py
+tests/auth/test_oauth_service.py
+tests/security/test_rbac_manager.py
+tests/audit/test_event_collector.py
+tests/security/test_encryption_service.py
+tests/performance/test_response_optimizer.py
